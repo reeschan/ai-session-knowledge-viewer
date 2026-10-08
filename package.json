@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "analyze": "tsx scripts/analyze.ts"
   },
   "dependencies": {
     "next": "16.4.0",
+    "openai": "^7.30.1",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
@@ -21,6 +23,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
