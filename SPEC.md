@@ -1,21 +1,23 @@
 # Knowledge Viewer — 仕様書
 
 このPCに保存されている AI エージェント (Claude Code / Codex) の会話ログを読み込み、
-ローカル LLM でサマリーとカテゴリを付けて、ナレッジとして閲覧できる Next.js アプリ。
+LLM でサマリーとカテゴリを付けて、ナレッジとして閲覧できる Next.js アプリ。
+
+汎用化後の設計は `docs/design/generalize.md` を参照。
 
 ## 前提
 
-- 作業ディレクトリ: `D:\llm\knowledge-app` (このファイルがある場所)。ここ以外のファイルを作成・変更しないこと。
-- ログの場所 (読み取り専用。絶対に書き込み・削除しないこと):
-  - `C:\path\to\AI\claude-code\logs\<YYYY-MM>\*.md`
-  - `C:\path\to\AI\codex\logs\<YYYY-MM>\*.md`
-  - 各フォルダの `INDEX.md` はログではないので無視する。
-- ローカル LLM (OpenAI 互換 API):
-  - baseURL: `http://127.0.0.1:8888/v1`
-  - apiKey: `local`
-  - model: `qwen3.8-27b-exl3-2.0bpw`
-  - これらは `.env.local` の `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL` / `LOG_ROOT` から読む。`.env.local.example` も用意する。
-- 技術: Next.js (App Router) + TypeScript + Tailwind CSS。DB は使わない。追加ライブラリは最小限 (`openai` パッケージのみ可)。
+- 汎用化後の設計は `docs/design/generalize.md` を参照。
+- ログの場所 (読み取り専用。絶対に書き込み・削除しないこと): `/settings` で指定する。3 種類のソースを読む。
+  - Claude Code の生ログ: 既定 `~/.claude/projects` (`**/*.jsonl`)
+  - Codex の生ログ: 既定 `~/.codex/sessions` (`**/rollout-*.jsonl`)
+  - session-log 形式の Markdown: `<YYYY-MM>/*.md`。環境変数 `LOG_ROOT` でも指定できる。各フォルダの `INDEX.md` はログではないので無視する。
+  - 同じ sessionId が複数のソースにあるときは 1 件にまとめ、Markdown を優先する。
+- LLM は `/settings` で切り替える。環境変数 (`ANTHROPIC_API_KEY` / `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL` / `LOG_ROOT`) があれば設定より優先する。
+  - Anthropic (既定モデル `claude-opus-5-5`)
+  - OpenAI 互換 API (ローカル LLM など。ベース URL の既定は `http://127.0.0.1:8888/v1`)
+  - 設定は `data/settings.json` に保存する (API キーは平文)。`.env.local.example` に変数の雛形がある。
+- 技術: Next.js (App Router) + TypeScript + Tailwind CSS + zod。DB は使わない。LLM は `@anthropic-ai/sdk` と `openai`。
 - npm は `npm` を使う。
 
 ## ログファイルの形式
@@ -49,16 +51,18 @@
 
 ```ts
 type LogEntry = {
-  id: string;            // ファイル名 (拡張子なし)
+  id: string;            // Markdown はファイル名 (拡張子なし)、生ログは cc-<sessionId> / codex-<sessionId>
   client: "claude-code" | "codex";
+  source: "markdown" | "claude-code" | "codex";  // どのソースから読んだか
   title: string;
   sessionId: string;
   project: string;       // プロジェクトパスの最後のフォルダ名
   branch: string;
   startedAt: string;     // "2026-10-01 10:34:10"
+  updatedAt: string;     // ログの中の最終更新時刻 (ダイジェストの期間判定に使う)
   filePath: string;
   mtimeMs: number;
-  finalResponse: string; // 「### 最終応答」の本文
+  finalResponse: string; // 「### 最終応答」の本文 (生ログでは最後の応答)
 };
 
 type Analysis = {
@@ -71,26 +75,38 @@ type Analysis = {
 };
 ```
 
+固定カテゴリから 1 つ
+  tags: string[];        // 3〜6 個の短いキーワード
+  learnings: string[];   // 再利用できる知見・ハマりどころ (0〜5 個)
+};
+```
+
 固定カテゴリ: `実装` / `バグ修正` / `レビュー` / `設計・調査` / `インフラ・環境構築` / `ツール・設定` / `その他`
 
 ## 機能
 
-1. `lib/logs.ts`: ログを全件走査して `LogEntry[]` を返す (会話全文は読み込まない。ファイル先頭〜`## 会話` の手前だけ使う)。
-2. `scripts/analyze.ts` (`npm run analyze` で実行、`tsx` で動かす):
+1. `lib/settings.ts`: 設定 (`data/settings.json`、zod で検証) の読み書き。環境変数で上書きする。
+2. `lib/sources/`: 3 種類のソースを読み、`listLogs()` が sessionId で重複を除いて新しい順の `LogEntry[]` を返す (会話全文は読み込まない)。生ログの読み取り結果は `data/log-index.json` にキャッシュする。
+3. `lib/llm/`: 設定に応じて Anthropic / OpenAI 互換を切り替える `summarize()`。
+4. `scripts/analyze.ts` (`npm run analyze`、`tsx` で実行):
    - 未解析 or mtime が変わったログだけを LLM に送る。
-   - 入力はタイトル・プロジェクト・最終応答 + 会話全文の先頭 6000 文字まで。
-   - LLM には JSON のみを返させ、パースに失敗したら 1 回だけ再試行、それでもダメならスキップしてログ出力。
-   - 結果は `data/analysis.json` (id をキーにしたオブジェクト) に 1 件ごとに保存 (途中で止めても進捗が残るように)。
+   - LLM には JSON のみを返させ、結果は `data/analysis.json` に 1 件ごとに保存する (途中で止めても進捗が残る)。失敗したログは未解析のまま残す。
    - `--limit N` オプションで処理件数を制限できる。
-3. 画面 (Server Components でファイルを直接読む):
-   - `/` 一覧: カテゴリ別件数のサイドバー、キーワード検索 (タイトル・サマリー・タグ)、クライアント/プロジェクトで絞り込み。新しい順。
-   - `/log/[id]` 詳細: メタ情報、サマリー、タグ、学び、最終応答 (Markdown をそのまま `<pre>` で可)。
+5. `scripts/digest.ts` (`npm run digest -- --period daily|weekly [--now <日時>]`): 期間内のログと解析結果から Markdown のダイジェストを標準出力に出す。期間は `updatedAt` で判定する。
+6. `lib/skills.ts`: スキルの生成。セッション保管スキル (`~/.claude/skills/session-archive`、Stop フックが必要) と、日次・週次ダイジェストの定期実行タスク (`~/.claude/scheduled-tasks/knowledge-digest-<period>`、Claude Desktop と Slack コネクタが必要)。
+7. 画面 (Server Components):
+   - `/` 一覧: カテゴリ別件数のサイドバー、キーワード検索 (`q`)、`category` (`未解析` を含む) / `client` / `project` / `tag` で絞り込み。新しい順。
+   - `/log/[id]` 詳細: メタ情報、サマリー、タグ、学び、最終応答。
    - `/learnings` 全ログの「学び」をカテゴリ別に一覧。
+   - `/settings` 設定画面 (ログの場所、LLM、API キー、スキルの設定)。
+   - `/skills` スキル生成画面 (プレビュー、ダウンロード、インストール)。
    - 未解析のログも一覧に出し、「未解析」バッジを付ける。
-4. デザインはシンプルでよい。ダークモード対応 (Tailwind の `dark:`)。
+8. セキュリティ: `dev` / `start` は `127.0.0.1` だけで待ち受ける。設定保存とスキルのインストールの API は、別のサイトや LAN からのリクエストを拒否する。
+9. デザインはシンプルでよい。ダークモード対応 (Tailwind の `dark:`)。
 
 ## 完了条件
 
 - `npm run build` が成功する。
 - `npm run analyze -- --limit 3` で 3 件が `data/analysis.json` に入る。
-- `npm run dev` で上記ページが表示される。
+- `npm run dev` で上記ページと `/settings`・`/skills` が表示される。
+- `npm run digest -- --period daily` が Markdown を標準出力に出す。

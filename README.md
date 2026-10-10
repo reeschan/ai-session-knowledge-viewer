@@ -1,66 +1,101 @@
 # Knowledge Viewer
 
-このPCに保存されている AI エージェント (Claude Code / Codex) の会話ログを読み込み、
-ローカル LLM でサマリーとカテゴリを付けて、ナレッジとして閲覧できる Next.js アプリ。
+Claude Code / Codex の会話ログを読み込み、LLM でサマリー・カテゴリ・タグ・学びを付けて、ナレッジとして閲覧する Next.js アプリです。
 
-仕様の詳細は `SPEC.md`、作業の進捗は `NEXT-STEPS.md` を参照。
+仕様は `SPEC.md`、汎用化の設計は `docs/design/generalize.md`、作業メモは `NEXT-STEPS.md` を参照してください。
 
-## 前提
-
-- Node.js と npm (このリポジトリは `npm` で扱う)
-- OpenAI 互換の API を提供するローカル LLM サーバー (既定: `http://127.0.0.1:8888/v1`、モデル `qwen3.8-27b-exl3-2.0bpw`)
-- `.env.local` を作成する。雛形は `.env.local.example` にあるので、コピーして値を合わせる。
-
-  ```bash
-  cp .env.local.example .env.local
-  ```
-
-  | 変数 | 内容 |
-  | --- | --- |
-  | `LLM_BASE_URL` | ローカル LLM の API ベース URL |
-  | `LLM_API_KEY` | API キー (ローカルなら任意の文字列) |
-  | `LLM_MODEL` | 使用するモデル名 |
-  | `LOG_ROOT` | ログの置き場所。配下の `claude-code\logs\<YYYY-MM>\*.md` と `codex\logs\<YYYY-MM>\*.md` を読む (読み取り専用) |
-
-## 使い方
+## 使い始め
 
 ```bash
 npm install
-
-# 未解析のログをローカル LLM で解析し、data/analysis.json に保存する
-npm run analyze
-npm run analyze -- --limit N   # 先頭 N 件だけ解析する (動作確認向け)
-
-# 開発サーバー (http://localhost:3000)
-npm run dev
-
-# 本番ビルド
-npm run build
+npm run dev        # http://127.0.0.1:3000
 ```
 
-`npm run analyze` は 1 件ごとに結果を保存するので、途中で止めても次回は続きから解析する。
-解析の失敗は未解析のまま残り、もう一度実行すると再試行される。
+1. ブラウザで `/settings` を開き、ログの場所、使う LLM、API キーを設定して保存する。
+2. 未解析のログを LLM で解析する。
+
+```bash
+npm run analyze
+npm run analyze -- --limit N   # 先頭 N 件だけ解析する (動作確認向け)
+```
+
+解析は 1 件ごとに保存されるので、途中で止めても次回は続きから始まる。失敗したログは未解析のまま残り、再実行で再試行される。
+新規・更新されたログだけが再解析される。
+
+## 読めるログ
+
+| 種類 | 既定の場所 |
+| --- | --- |
+| Claude Code の生ログ (JSONL) | `~/.claude/projects` |
+| Codex の生ログ (JSONL) | `~/.codex/sessions` |
+| session-log 形式の Markdown | 設定画面で指定 (環境変数 `LOG_ROOT` でも指定できる) |
+
+場所は `/settings` で変更・追加できる。同じセッション (sessionId が同じもの) が複数のソースにあるときは 1 件にまとめ、Markdown を優先する。
+ログフォルダは読み取り専用で、アプリは書き込み・削除をしない。
+
+## LLM
+
+`/settings` で次の 2 つを切り替える。
+
+- Anthropic: 既定モデルは `claude-opus-5-5`。
+- OpenAI 互換: ローカル LLM や OpenAI など。ベース URL・API キー・モデル名を指定する (ベース URL の既定は `http://127.0.0.1:8888/v1`)。
+
+API キーは `data/settings.json` に **平文** で保存される (画面では末尾 4 文字以外を伏せて表示する)。
+次の環境変数があれば、設定画面の値より優先される。`.env.local` に書ける (雛形は `.env.local.example`)。
+
+| 変数 | 内容 |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | Anthropic の API キー |
+| `LLM_BASE_URL` | OpenAI 互換 API のベース URL |
+| `LLM_API_KEY` | OpenAI 互換 API のキー |
+| `LLM_MODEL` | OpenAI 互換 API のモデル名 |
+| `LOG_ROOT` | Markdown ログの置き場所 |
 
 ## 画面
 
-- `/` : ログの一覧。サイドバーのカテゴリで絞り込む (「すべて」と、解析前の `未解析` を含む)。
-  - クエリ `q` : タイトル・サマリー・タグの検索
+- `/` : ログの一覧。サイドバーのカテゴリで絞り込む。クエリは次のとおりで、互いに保持される。
+  - `q` : タイトル・サマリー・タグの検索
   - `category` : カテゴリ。`未解析` を指定すると未解析のログだけを表示する
-  - `client` / `project` : クライアントとプロジェクトで絞り込む
-  - `tag` : タグで絞り込む。一覧と詳細のタグをクリックすると `/?tag=<タグ>` に移動する
-  - 上記の条件は互いに保持される
-- `/log/[id]` : 1 件の詳細。サマリー、学び、最終応答を表示する
-- `/learnings` : 各ログの学びをカテゴリごとにまとめて表示する
+  - `client` / `project` : クライアントとプロジェクト
+  - `tag` : タグ (一覧と詳細のタグをクリックすると移動する)
+- `/log/[id]` : 1 件の詳細 (サマリー、学び、最終応答)
+- `/learnings` : 学びをカテゴリごとにまとめて表示
+- `/settings` : ログの場所、LLM、API キー、スキルの設定
+- `/skills` : スキルの生成 (プレビュー、インストール)
 
-## データ
+## コマンド
 
-- 解析結果は `data/analysis.json` に保存する (リポジトリ外に出さないため `.gitignore` 済み)。
-- ログのファイルの更新時刻 (mtime) を解析結果と比べ、新規・更新されたログだけを再解析する。
-- ログは会話全文ではなくヘッダ部分 (`## 会話` の手前) だけを読む。
-- ログフォルダは読み取り専用で、アプリから書き込み・削除はしない。
+| コマンド | 内容 |
+| --- | --- |
+| `npm run analyze` | 未解析のログを解析する。`--limit N` で件数を制限 |
+| `npm run digest -- --period daily` | 日次ダイジェスト (Markdown) を標準出力に出す |
+| `npm run digest -- --period weekly` | 週次ダイジェスト。`--now <日時>` で基準時刻を指定できる |
+| `npm run dev` / `npm run start` | 開発 / 本番サーバー |
+| `npm run build` / `npm run lint` | ビルド / Lint |
+
+ダイジェストの期間は、ログの中の最終更新時刻 (Markdown ヘッダの「最終更新」、生ログの最後の時刻) で判定する。ファイルの更新時刻ではない。
+
+## スキル生成
+
+`/skills` で次の 2 つを生成し、`~/.claude` 配下にインストールできる。
+
+- セッション保管スキル (Claude Code): 会話の JSONL を保管先にコピーし、要約を書く。**Stop フックの登録が必要** (画面に表示される断片を `~/.claude/settings.json` に自分で追記する。アプリは書き換えない)。
+- 日次・週次ダイジェストの定期実行タスク (Claude Desktop): `npm run digest` の出力を Slack に投稿する。**Slack コネクタが必要**。頻度は Desktop の画面で選ぶ。アプリが起動中で PC が起きている間だけ動く。
+
+## データの置き場所
+
+`data/` 配下 (`.gitignore` 済み)。`KV_DATA_DIR` で変更できる。
+
+- `data/settings.json` : 設定 (API キーを含む)
+- `data/analysis.json` : 解析結果
+- `data/log-index.json` : 生ログの読み取りキャッシュ
+
+## セキュリティ
+
+- `npm run dev` / `npm run start` は `127.0.0.1` だけで待ち受ける。
+- 設定保存とスキルのインストールの API は、別のサイトや LAN からのリクエストを拒否する。
 
 ## 開発メモ
 
-- Next.js 16 (App Router) + TypeScript + Tailwind CSS。DB は使わない。
-- 各ページは `force-dynamic` で、Server Component として `data/analysis.json` とログを読む。
-- 型チェックは `npx tsc --noEmit`、Lint は `npm run lint`。
+Next.js 16 (App Router) + TypeScript + Tailwind CSS。DB は使わず、各ページは Server Component でファイルを直接読む。
+型チェックは `npx tsc --noEmit`。
