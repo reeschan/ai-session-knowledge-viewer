@@ -122,3 +122,12 @@ API キーは `data/settings.json` に **平文** で保存される (画面で�
 Next.js 16 (App Router) + TypeScript + Tailwind CSS。DB は使わず、各ページは Server Component でファイルを直接読む。
 型チェックは `pnpm exec tsc --noEmit`。パッケージマネージャーは pnpm（`package.json` の `packageManager`）。
 アーキ図のソースは `docs/architecture/architecture.d2`。構成を変えたら arch-diagram スキルで描き直す。
+
+## ブランチ
+
+- `main`: 公開・リリース用。`develop` から取り込む。
+- `develop`: 開発の統合先。作業は `develop` からブランチを切って戻す。
+
+## ライセンス
+
+[MIT](LICENSE)
