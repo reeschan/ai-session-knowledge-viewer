@@ -29,6 +29,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               >
                 学び
               </Link>
+              <Link
+                href="/settings"
+                className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+              >
+                設定
+              </Link>
             </nav>
           </div>
         </header>
