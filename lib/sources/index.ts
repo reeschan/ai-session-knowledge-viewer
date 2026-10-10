@@ -2,14 +2,18 @@ import { stat } from "node:fs/promises";
 import { effectiveSettings, expandHome, type SourceType } from "../settings";
 import type { LogEntry } from "../types";
 import { LogCache } from "./cache";
+import { claudeCodeAdapter } from "./claude-code";
+import { codexAdapter } from "./codex";
 import { markdownAdapter } from "./markdown";
 import type { SourceAdapter } from "./types";
 
 export type { SourceAdapter } from "./types";
 
-/** claude-code / codex のアダプタは PBI-010 で追加する。アダプタが無い種類のソースはスキップする。 */
+/** アダプタが無い種類のソースはスキップする。 */
 const ADAPTERS: Partial<Record<SourceType, SourceAdapter>> = {
   markdown: markdownAdapter,
+  "claude-code": claudeCodeAdapter,
+  codex: codexAdapter,
 };
 
 const PARSE_CONCURRENCY = 16;
