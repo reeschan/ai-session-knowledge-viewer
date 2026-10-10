@@ -67,7 +67,7 @@ export default async function ListPage({
   return (
     <div className="mx-auto flex max-w-6xl gap-6 px-4 py-6">
       <aside className="w-48 shrink-0">
-        <h2 className="mb-2 text-sm font-semibold text-zinc-500 dark:text-zinc-400">
+        <h2 className="mb-2 text-sm font-semibold text-muted-foreground">
           カテゴリ
         </h2>
         <ul className="flex flex-col gap-1 text-sm">
@@ -75,14 +75,14 @@ export default async function ListPage({
             <Link
               href={buildHref({ category: "", q, client, project, tag })}
               data-category-link=""
-              className={`block rounded px-2 py-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 ${
+              className={`block rounded-full px-2 py-1 ${
                 category === ""
-                  ? "bg-zinc-200 font-medium dark:bg-zinc-800"
-                  : "text-zinc-700 dark:text-zinc-300"
+                  ? "bg-primary font-medium text-primary-foreground"
+                  : "text-foreground/85 hover:bg-accent"
               }`}
             >
               すべて
-              <span className="ml-1 text-xs text-zinc-500 dark:text-zinc-400">
+              <span className="ml-1 text-xs text-muted-foreground">
                 {all.length}
               </span>
             </Link>
@@ -92,14 +92,14 @@ export default async function ListPage({
               <Link
                 href={buildHref({ category: c, q, client, project, tag })}
                 data-category-link={c}
-                className={`block rounded px-2 py-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 ${
+                className={`block rounded-full px-2 py-1 ${
                   category === c
-                    ? "bg-zinc-200 font-medium dark:bg-zinc-800"
-                    : "text-zinc-700 dark:text-zinc-300"
+                    ? "bg-primary font-medium text-primary-foreground"
+                    : "text-foreground/85 hover:bg-accent"
                 }`}
               >
                 {c}
-                <span className="ml-1 text-xs text-zinc-500 dark:text-zinc-400">
+                <span className="ml-1 text-xs text-muted-foreground">
                   {categoryCounts.get(c)}
                 </span>
               </Link>
@@ -116,12 +116,12 @@ export default async function ListPage({
             name="q"
             defaultValue={q}
             placeholder="キーワード検索"
-            className="w-48 rounded border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-48 rounded-sm border border-input bg-card px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <select
             name="client"
             defaultValue={client}
-            className="rounded border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded-sm border border-input bg-card px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="">全クライアント</option>
             <option value="claude-code">claude-code</option>
@@ -130,7 +130,7 @@ export default async function ListPage({
           <select
             name="project"
             defaultValue={project}
-            className="rounded border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded-sm border border-input bg-card px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="">全プロジェクト</option>
             {projects.map((p) => (
@@ -139,19 +139,19 @@ export default async function ListPage({
               </option>
             ))}
           </select>
-          <button type="submit" className="rounded bg-zinc-800 px-3 py-1 text-sm text-white dark:bg-zinc-700">
+          <button type="submit" className="rounded-full bg-primary px-3 py-1 text-sm font-semibold text-primary-foreground shadow-md hover:bg-primary/85 disabled:opacity-50">
             絞り込み
           </button>
         </form>
 
         {tag && (
-          <div className="mb-4 text-sm text-zinc-700 dark:text-zinc-300">
+          <div className="mb-4 text-sm text-foreground/85">
             タグ: {tag}{" "}
             <Link
               href={buildHref({ q, category, client, project })}
               data-tag-clear=""
               aria-label="タグの絞り込みを解除"
-              className="ml-1 text-zinc-500 hover:underline dark:text-zinc-400"
+              className="ml-1 text-muted-foreground hover:text-primary hover:underline"
             >
               ×
             </Link>
@@ -163,7 +163,7 @@ export default async function ListPage({
             <li
               key={entry.id}
               data-entry-id={entry.id}
-              className="rounded border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
+              className="rounded-md border border-border bg-card p-4 text-card-foreground shadow-md"
             >
               <div className="flex items-start justify-between gap-2">
                 <Link
@@ -172,28 +172,28 @@ export default async function ListPage({
                 >
                   {entry.title || "(タイトルなし)"}
                 </Link>
-                <span className="shrink-0 text-xs text-zinc-500 dark:text-zinc-400">
+                <span className="shrink-0 text-xs text-muted-foreground">
                   {entry.startedAt}
                 </span>
               </div>
-              <div className="mt-1 flex flex-wrap gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+              <div className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground">
                 <span>{entry.project}</span>
                 <span>{entry.client}</span>
                 {entry.analysis ? (
-                  <span className="rounded bg-zinc-200 px-2 py-0.5 dark:bg-zinc-700">
+                  <span className="rounded-full bg-accent px-2 py-0.5 text-accent-foreground">
                     {entry.analysis.category}
                   </span>
                 ) : (
                   <span
                     data-badge="unanalyzed"
-                    className="rounded bg-zinc-100 px-2 py-0.5 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+                    className="rounded-full bg-accent px-2 py-0.5 text-accent-foreground"
                   >
                     未解析
                   </span>
                 )}
               </div>
               {entry.analysis?.summary && (
-                <p className="mt-2 line-clamp-2 text-sm text-zinc-700 dark:text-zinc-300">
+                <p className="mt-2 line-clamp-2 text-sm text-foreground/85">
                   {entry.analysis.summary}
                 </p>
               )}
@@ -203,7 +203,7 @@ export default async function ListPage({
                     <Link
                       key={t}
                       href={buildHref({ q, category, client, project, tag: t })}
-                      className="rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 hover:underline dark:bg-zinc-800 dark:text-zinc-300"
+                      className="rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground hover:underline"
                     >
                       {t}
                     </Link>

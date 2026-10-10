@@ -1,13 +1,14 @@
+import Link from "next/link";
 import { envOverrides, loadSettings, maskKey, SOURCE_TYPES } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
 const inputClass =
-  "w-full rounded border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900";
+  "w-full rounded-sm border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring px-2 py-1 text-sm";
 const labelClass = "flex flex-col gap-1 text-sm";
-const hintClass = "text-xs text-zinc-500 dark:text-zinc-400";
+const hintClass = "text-xs text-muted-foreground";
 const sectionClass =
-  "flex flex-col gap-3 rounded border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900";
+  "flex flex-col gap-3 rounded-md border border-border bg-card text-card-foreground shadow-md p-4";
 
 function keyPlaceholder(current: string): string {
   const masked = maskKey(current);
@@ -57,22 +58,25 @@ export default async function SettingsPage({
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-6">
       <h1 className="text-xl font-semibold">設定</h1>
+      <p className={hintClass}>
+        各項目の説明は <Link href="/manual" className="text-primary hover:underline">マニュアル</Link> を参照。Claude Code では <code>/knowledge-setup</code> で対話しながら設定できます。
+      </p>
 
       {saved && (
-        <p className="rounded border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
+        <p className="rounded-md border border-success/50 bg-success/15 text-success px-3 py-2 text-sm">
           保存しました
         </p>
       )}
 
       {overrides.length > 0 && (
-        <p className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+        <p className="rounded-md border border-warning/50 bg-warning/15 text-warning px-3 py-2 text-sm">
           環境変数で上書きされている項目: {overrides.join(", ")}
         </p>
       )}
 
       <form method="post" action="/api/settings" className="flex flex-col gap-4">
         <section className={sectionClass}>
-          <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">ログのソース</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground">ログのソース</h2>
           <p className={hintClass}>パスを空にすると削除します。最後の空行に入力すると追加します。</p>
           {rows.map((row, i) => (
             <div key={i} className="flex flex-wrap items-center gap-2">
@@ -99,7 +103,7 @@ export default async function SettingsPage({
         </section>
 
         <section className={sectionClass}>
-          <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">LLM</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground">LLM</h2>
           <label className={labelClass}>
             <span>プロバイダ</span>
             <select name="llm.provider" defaultValue={settings.llm.provider} className={inputClass}>
@@ -116,7 +120,7 @@ export default async function SettingsPage({
         </section>
 
         <section className={sectionClass}>
-          <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">スキル生成</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground">スキル生成</h2>
           <TextField name="skills.storeDir" label="保存先フォルダ" defaultValue={settings.skills.storeDir} />
           <TextField name="skills.slackChannel" label="Slack チャンネル" defaultValue={settings.skills.slackChannel} />
           <TextField name="skills.appDir" label="アプリのフォルダ" defaultValue={settings.skills.appDir} />
@@ -125,7 +129,7 @@ export default async function SettingsPage({
         <div>
           <button
             type="submit"
-            className="rounded bg-zinc-900 px-4 py-1.5 text-sm text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+            className="rounded-full bg-primary text-primary-foreground font-semibold shadow-md hover:bg-primary/85 disabled:opacity-50 px-4 py-1.5 text-sm"
           >
             保存
           </button>

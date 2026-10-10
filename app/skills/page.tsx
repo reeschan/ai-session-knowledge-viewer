@@ -6,15 +6,15 @@ export const dynamic = "force-dynamic";
 type Query = { [key: string]: string | string[] | undefined };
 
 const inputClass =
-  "w-full rounded border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900";
+  "w-full rounded-sm border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring px-2 py-1 text-sm";
 const labelClass = "flex flex-col gap-1 text-sm";
-const hintClass = "text-xs text-zinc-500 dark:text-zinc-400";
+const hintClass = "text-xs text-muted-foreground";
 const sectionClass =
-  "flex flex-col gap-3 rounded border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900";
+  "flex flex-col gap-3 rounded-md border border-border bg-card text-card-foreground shadow-md p-4";
 const preClass =
-  "overflow-x-auto whitespace-pre-wrap rounded border border-zinc-200 bg-zinc-100 p-3 text-xs dark:border-zinc-800 dark:bg-zinc-950";
+  "overflow-x-auto whitespace-pre-wrap rounded-md border border-border bg-muted text-foreground p-3 text-xs";
 const buttonClass =
-  "rounded bg-zinc-900 px-4 py-1.5 text-sm text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300";
+  "rounded-full bg-primary text-primary-foreground font-semibold shadow-md hover:bg-primary/85 disabled:opacity-50 px-4 py-1.5 text-sm";
 
 function first(v: string | string[] | undefined): string | undefined {
   return Array.isArray(v) ? v[0] : v;
@@ -46,7 +46,7 @@ export default async function SkillsPage({ searchParams }: { searchParams: Promi
       <h1 className="text-xl font-semibold">スキル生成</h1>
 
       {installed !== undefined && (
-        <div className="rounded border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
+        <div className="rounded-md border border-success/50 bg-success/15 text-success px-3 py-2 text-sm">
           <p>{`${installed} 件のファイルをインストールしました`}</p>
           <p>
             フックを有効にするには、フックの断片を ~/.claude/settings.json の hooks に足してください
@@ -86,7 +86,7 @@ export default async function SkillsPage({ searchParams }: { searchParams: Promi
 
       {generated && (
         <section className={sectionClass}>
-          <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">プレビュー</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground">プレビュー</h2>
           {generated.files.map((f) => (
             <div key={f.path} className="flex flex-col gap-1">
               <p className="break-all font-mono text-xs font-semibold">~/{f.path}</p>
@@ -124,7 +124,7 @@ export default async function SkillsPage({ searchParams }: { searchParams: Promi
       )}
 
       <section className={sectionClass}>
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">定期実行について</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground">定期実行について</h2>
         <p className="text-sm">
           Claude Desktop の定期実行タスクは、Desktop の画面で頻度を選びます。タスクは Claude Desktop
           アプリが起動していて、PC が起きている間だけ動きます。

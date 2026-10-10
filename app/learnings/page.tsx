@@ -25,12 +25,12 @@ export default async function LearningsPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
       <h1 className="text-2xl font-semibold">学び</h1>
-      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+      <p className="mt-1 text-sm text-muted-foreground">
         全ログの「学び」をカテゴリ別に一覧
       </p>
 
       {sections.length === 0 && (
-        <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-4 text-sm text-muted-foreground">
           まだ解析されたログがありません。
         </p>
       )}
@@ -45,12 +45,12 @@ export default async function LearningsPage() {
                 <li
                   key={i}
                   data-learning-item=""
-                  className="rounded border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
+                  className="rounded-md border border-border bg-card p-3 text-card-foreground shadow-md"
                 >
-                  <p className="text-sm text-zinc-700 dark:text-zinc-300">{item.learning}</p>
+                  <p className="text-sm text-foreground/85">{item.learning}</p>
                   <Link
                     href={`/log/${item.logId}`}
-                    className="mt-1 block text-xs text-zinc-500 hover:underline dark:text-zinc-400"
+                    className="mt-1 block text-xs text-muted-foreground hover:text-primary hover:underline"
                   >
                     {item.title}
                   </Link>

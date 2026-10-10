@@ -1,26 +1,147 @@
+/* 生成元: style-guide テーマ dark-pop-purple（~/.claude/style-guide/themes/dark-pop-purple/theme.css）。値はそちらで調整して再コピーする */
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-secondary: var(--secondary);
+  --color-primary: var(--primary);
+  --color-ring: var(--ring);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-brand-accent: var(--brand-accent);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-card-foreground: var(--card-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-brand-accent-foreground: var(--brand-accent-foreground);
+  --radius-sm: calc(var(--theme-radius) * 0.5);
+  --radius-md: var(--theme-radius);
+  --radius-lg: calc(var(--theme-radius) * 1.5);
+  --spacing: calc(0.25rem * var(--theme-spacing-scale));
+  --shadow-md: var(--theme-shadow);
+  --font-sans: var(--theme-font-body);
+  --font-heading: var(--theme-font-heading);
+  --font-mono: var(--theme-font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ダークポップ・パープル — サンリオ風のかわいさを少し残しつつ、ダークな背景にクールな紫を基調としたポップなトンマナ。 */
+[data-theme="dark-pop-purple"] {
+  color-scheme: dark;
+  --background: oklch(0.160 0.010 300.0);
+  --foreground: oklch(0.960 0.010 300.0);
+  --card: oklch(0.200 0.010 300.0);
+  --muted: oklch(0.250 0.010 300.0);
+  --muted-foreground: oklch(0.680 0.010 300.0);
+  --border: oklch(0.300 0.010 300.0);
+  --input: oklch(0.300 0.010 300.0);
+  --secondary: oklch(0.270 0.010 300.0);
+  --primary: oklch(0.700 0.155 300.0);
+  --ring: oklch(0.620 0.161 300.0);
+  --accent: oklch(0.280 0.048 300.0);
+  --accent-foreground: oklch(0.850 0.087 300.0);
+  --brand-accent: oklch(0.720 0.121 60.0);
+  --destructive: oklch(0.620 0.200 25.0);
+  --success: oklch(0.650 0.148 150.0);
+  --warning: oklch(0.750 0.136 75.0);
+  --card-foreground: oklch(0.960 0.010 300.0);
+  --secondary-foreground: oklch(0.960 0.010 300.0);
+  --primary-foreground: oklch(0.180 0.010 300.0);
+  --destructive-foreground: oklch(0.180 0.010 300.0);
+  --success-foreground: oklch(0.180 0.010 300.0);
+  --warning-foreground: oklch(0.180 0.010 300.0);
+  --brand-accent-foreground: oklch(0.180 0.010 300.0);
+  --theme-radius: 14px;
+  --theme-spacing-scale: 1.045;
+  --theme-shadow: 3px 3px 0 0 var(--foreground);
+  --theme-font-heading: "Mochiy Pop One", sans-serif;
+  --theme-font-body: "Zen Maru Gothic", sans-serif;
+  --theme-font-mono: "Space Mono", monospace;
+}
+[data-theme="dark-pop-purple"][data-mode="light"] {
+  color-scheme: light;
+  --background: oklch(0.985 0.008 300.0);
+  --foreground: oklch(0.200 0.010 300.0);
+  --card: oklch(1.000 0.000 300.0);
+  --muted: oklch(0.955 0.010 300.0);
+  --muted-foreground: oklch(0.480 0.010 300.0);
+  --border: oklch(0.900 0.010 300.0);
+  --input: oklch(0.900 0.010 300.0);
+  --secondary: oklch(0.940 0.010 300.0);
+  --primary: oklch(0.550 0.159 300.0);
+  --ring: oklch(0.620 0.161 300.0);
+  --accent: oklch(0.950 0.028 300.0);
+  --accent-foreground: oklch(0.350 0.121 300.0);
+  --brand-accent: oklch(0.600 0.129 60.0);
+  --destructive: oklch(0.550 0.198 25.0);
+  --success: oklch(0.500 0.138 150.0);
+  --warning: oklch(0.750 0.136 75.0);
+  --card-foreground: oklch(0.200 0.010 300.0);
+  --secondary-foreground: oklch(0.200 0.010 300.0);
+  --primary-foreground: oklch(0.985 0.008 300.0);
+  --destructive-foreground: oklch(0.985 0.008 300.0);
+  --success-foreground: oklch(0.985 0.008 300.0);
+  --warning-foreground: oklch(0.180 0.010 300.0);
+  --brand-accent-foreground: oklch(0.180 0.010 300.0);
+}
+
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+  }
+  h1, h2, h3 {
+    font-family: var(--font-heading);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .manual h1 { font-size: 1.5rem; font-family: var(--font-heading); margin: 0 0 1rem; }
+  .manual h2 {
+    font-size: 1.25rem;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .manual h3 { font-size: 1.05rem; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+  .manual p, .manual ul, .manual ol { margin-top: 0.75rem; margin-bottom: 0.75rem; }
+  .manual ul { list-style: disc; padding-left: 1.5rem; }
+  .manual ol { list-style: decimal; padding-left: 1.5rem; }
+  .manual a { color: var(--primary); text-decoration: underline; }
+  .manual code {
+    background: var(--muted);
+    font-family: var(--font-mono);
+    border-radius: var(--radius-sm);
+    padding: 0.1rem 0.3rem;
+    font-size: 0.9em;
+  }
+  .manual pre {
+    background: var(--muted);
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    margin: 0.75rem 0;
+  }
+  .manual pre code { background: none; padding: 0; }
+  .manual table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; }
+  .manual th, .manual td { border: 1px solid var(--border); padding: 0.4rem 0.6rem; text-align: left; }
+  .manual th { background: var(--muted); }
+  .manual img {
+    max-width: 100%;
+    height: auto;
+    background: var(--card);
+    border-radius: var(--radius-md);
+  }
 }

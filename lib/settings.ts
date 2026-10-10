@@ -76,7 +76,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 /** オブジェクトはキーごとにマージし、配列やその他の値は override で置き換える。 */
-function deepMerge(base: unknown, override: unknown): unknown {
+export function deepMerge(base: unknown, override: unknown): unknown {
   if (isPlainObject(base) && isPlainObject(override)) {
     const result: Record<string, unknown> = { ...base };
     for (const [key, value] of Object.entries(override)) {
