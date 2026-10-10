@@ -52,20 +52,20 @@ RULES:
 
 ```bash
 cd /d/llm/knowledge-app
-npm run analyze -- --limit 5   # まず少数で確認
-npm run analyze                # 残り全件 (約 120 件 × 30〜60 秒 ≒ 1〜2 時間)
+pnpm analyze --limit 5   # まず少数で確認
+pnpm analyze                # 残り全件 (約 120 件 × 30〜60 秒 ≒ 1〜2 時間)
 ```
 
 - 1 件ごとに `data/analysis.json` に保存されるので、途中で止めても続きから再開できる。
-- `JSON not found` で失敗したログは、もう一度 `npm run analyze` を実行すれば再試行される (未解析のまま残るため)。
+- `JSON not found` で失敗したログは、もう一度 `pnpm analyze` を実行すれば再試行される (未解析のまま残るため)。
 - 失敗が多い場合は Qwen に次を頼む: 「OpenAI の呼び出しに `response_format: { type: "json_object" }` を追加して、失敗時は応答の先頭 300 文字を console.error に出す」
 - 解析後に結果をざっと確認する: カテゴリの偏り、`その他` が多すぎないか、サマリーが日本語になっているか。
 
 ## フェーズ 6: 最終確認と後片付け
 
-- `npm run build` が通る。
+- `pnpm build` が通る。
 - `/` の件数がログの件数 (現在 125。増えていく) と一致する。
-- 新しいログが増えたら、`npm run analyze` を再実行すれば差分だけ解析される (mtime で判定)。
+- 新しいログが増えたら、`pnpm analyze` を再実行すれば差分だけ解析される (mtime で判定)。
 - 不要になったファイル: `scripts/check-logs.ts` (確認用。残してもよい)、`D:\llm\probe.ts`、`D:\llm\test-stderr.log`。
 
 ## 改善の候補 (任意)

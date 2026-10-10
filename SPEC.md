@@ -18,7 +18,7 @@ LLM でサマリーとカテゴリを付けて、ナレッジとして閲覧で�
   - OpenAI 互換 API (ローカル LLM など。ベース URL の既定は `http://127.0.0.1:8888/v1`)
   - 設定は `data/settings.json` に保存する (API キーは平文)。`.env.local.example` に変数の雛形がある。
 - 技術: Next.js (App Router) + TypeScript + Tailwind CSS + zod。DB は使わない。LLM は `@anthropic-ai/sdk` と `openai`。
-- npm は `npm` を使う。
+- パッケージマネージャーは pnpm を使う（`pnpm-lock.yaml`、`pnpm-workspace.yaml`）。
 
 ## ログファイルの形式
 
@@ -88,11 +88,11 @@ type Analysis = {
 1. `lib/settings.ts`: 設定 (`data/settings.json`、zod で検証) の読み書き。環境変数で上書きする。
 2. `lib/sources/`: 3 種類のソースを読み、`listLogs()` が sessionId で重複を除いて新しい順の `LogEntry[]` を返す (会話全文は読み込まない)。生ログの読み取り結果は `data/log-index.json` にキャッシュする。
 3. `lib/llm/`: 設定に応じて Anthropic / OpenAI 互換を切り替える `summarize()`。
-4. `scripts/analyze.ts` (`npm run analyze`、`tsx` で実行):
+4. `scripts/analyze.ts` (`pnpm analyze`、`tsx` で実行):
    - 未解析 or mtime が変わったログだけを LLM に送る。
    - LLM には JSON のみを返させ、結果は `data/analysis.json` に 1 件ごとに保存する (途中で止めても進捗が残る)。失敗したログは未解析のまま残す。
    - `--limit N` オプションで処理件数を制限できる。
-5. `scripts/digest.ts` (`npm run digest -- --period daily|weekly [--now <日時>]`): 期間内のログと解析結果から Markdown のダイジェストを標準出力に出す。期間は `updatedAt` で判定する。
+5. `scripts/digest.ts` (`pnpm digest --period daily|weekly [--now <日時>]`): 期間内のログと解析結果から Markdown のダイジェストを標準出力に出す。期間は `updatedAt` で判定する。
 6. `lib/skills.ts`: スキルの生成。セッション保管スキル (`~/.claude/skills/session-archive`、Stop フックが必要) と、日次・週次ダイジェストの定期実行タスク (`~/.claude/scheduled-tasks/knowledge-digest-<period>`、Claude Desktop と Slack コネクタが必要)。
 7. 画面 (Server Components):
    - `/` 一覧: カテゴリ別件数のサイドバー、キーワード検索 (`q`)、`category` (`未解析` を含む) / `client` / `project` / `tag` で絞り込み。新しい順。
@@ -106,7 +106,7 @@ type Analysis = {
 
 ## 完了条件
 
-- `npm run build` が成功する。
-- `npm run analyze -- --limit 3` で 3 件が `data/analysis.json` に入る。
-- `npm run dev` で上記ページと `/settings`・`/skills` が表示される。
-- `npm run digest -- --period daily` が Markdown を標準出力に出す。
+- `pnpm build` が成功する。
+- `pnpm analyze --limit 3` で 3 件が `data/analysis.json` に入る。
+- `pnpm dev` で上記ページと `/settings`・`/skills` が表示される。
+- `pnpm digest --period daily` が Markdown を標準出力に出す。

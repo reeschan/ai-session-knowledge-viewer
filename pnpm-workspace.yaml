@@ -1,0 +1,7 @@
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - openai@7.30.1 || 7.32.0
+  - '@anthropic-ai/sdk@0.133.0'
+  - '@types/node@26.6.5'

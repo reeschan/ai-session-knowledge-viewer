@@ -2,6 +2,7 @@
   "name": "knowledge-app",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@12.3.4",
   "scripts": {
     "dev": "next dev -H 127.0.0.1",
     "build": "next build",

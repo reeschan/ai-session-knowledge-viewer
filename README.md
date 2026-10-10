@@ -7,16 +7,16 @@ Claude Code / Codex の会話ログを読み込み、LLM でサマリー・カ�
 ## 使い始め
 
 ```bash
-npm install
-npm run dev        # http://127.0.0.1:3000
+pnpm install
+pnpm dev           # http://127.0.0.1:3000
 ```
 
 1. ブラウザで `/settings` を開き、ログの場所、使う LLM、API キーを設定して保存する。
 2. 未解析のログを LLM で解析する。
 
 ```bash
-npm run analyze
-npm run analyze -- --limit N   # 先頭 N 件だけ解析する (動作確認向け)
+pnpm analyze
+pnpm analyze --limit N   # 先頭 N 件だけ解析する (動作確認向け)
 ```
 
 解析は 1 件ごとに保存されるので、途中で止めても次回は続きから始まる。失敗したログは未解析のまま残り、再実行で再試行される。
@@ -67,11 +67,11 @@ API キーは `data/settings.json` に **平文** で保存される (画面で�
 
 | コマンド | 内容 |
 | --- | --- |
-| `npm run analyze` | 未解析のログを解析する。`--limit N` で件数を制限 |
-| `npm run digest -- --period daily` | 日次ダイジェスト (Markdown) を標準出力に出す |
-| `npm run digest -- --period weekly` | 週次ダイジェスト。`--now <日時>` で基準時刻を指定できる |
-| `npm run dev` / `npm run start` | 開発 / 本番サーバー |
-| `npm run build` / `npm run lint` | ビルド / Lint |
+| `pnpm analyze` | 未解析のログを解析する。`--limit N` で件数を制限 |
+| `pnpm digest --period daily` | 日次ダイジェスト (Markdown) を標準出力に出す |
+| `pnpm digest --period weekly` | 週次ダイジェスト。`--now <日時>` で基準時刻を指定できる |
+| `pnpm dev` / `pnpm start` | 開発 / 本番サーバー |
+| `pnpm build` / `pnpm lint` | ビルド / Lint |
 
 ダイジェストの期間は、ログの中の最終更新時刻 (Markdown ヘッダの「最終更新」、生ログの最後の時刻) で判定する。ファイルの更新時刻ではない。
 
@@ -80,7 +80,7 @@ API キーは `data/settings.json` に **平文** で保存される (画面で�
 `/skills` で次の 2 つを生成し、`~/.claude` 配下にインストールできる。
 
 - セッション保管スキル (Claude Code): 会話の JSONL を保管先にコピーし、要約を書く。**Stop フックの登録が必要** (画面に表示される断片を `~/.claude/settings.json` に自分で追記する。アプリは書き換えない)。
-- 日次・週次ダイジェストの定期実行タスク (Claude Desktop): `npm run digest` の出力を Slack に投稿する。**Slack コネクタが必要**。頻度は Desktop の画面で選ぶ。アプリが起動中で PC が起きている間だけ動く。
+- 日次・週次ダイジェストの定期実行タスク (Claude Desktop): `npm run digest` の出力を Slack に投稿する（タスクは Node.js 同梱の npm で実行するので、pnpm が無い環境でも動く）。**Slack コネクタが必要**。頻度は Desktop の画面で選ぶ。アプリが起動中で PC が起きている間だけ動く。
 
 ## データの置き場所
 
@@ -92,10 +92,10 @@ API キーは `data/settings.json` に **平文** で保存される (画面で�
 
 ## セキュリティ
 
-- `npm run dev` / `npm run start` は `127.0.0.1` だけで待ち受ける。
+- `pnpm dev` / `pnpm start` は `127.0.0.1` だけで待ち受ける。
 - 設定保存とスキルのインストールの API は、別のサイトや LAN からのリクエストを拒否する。
 
 ## 開発メモ
 
 Next.js 16 (App Router) + TypeScript + Tailwind CSS。DB は使わず、各ページは Server Component でファイルを直接読む。
-型チェックは `npx tsc --noEmit`。
+型チェックは `pnpm exec tsc --noEmit`。パッケージマネージャーは pnpm（`package.json` の `packageManager`）。
