@@ -9,6 +9,16 @@ Claude Code / Codex の会話ログを読み込み、LLM でサマリー・カ�
 
 仕様は `SPEC.md`、設定のマニュアルは `docs/MANUAL.md`（アプリでは `/manual`）、汎用化の設計は `docs/design/generalize.md`、作業メモは `NEXT-STEPS.md` を参照してください。
 
+## 画面イメージ
+
+デモ用の架空のログで撮影したもの。
+
+| 一覧 | 詳細 |
+| --- | --- |
+| <img src="docs/screenshots/list.png" alt="ログの一覧。カテゴリで絞り込み、各ログのサマリーとタグを表示している"> | <img src="docs/screenshots/detail.png" alt="ログの詳細。サマリー、タグ、学び、最終応答を表示している"> |
+| **学び** | **設定** |
+| <img src="docs/screenshots/learnings.png" alt="学びの一覧。カテゴリごとに、各ログから抽出した学びを並べている"> | <img src="docs/screenshots/settings.png" alt="設定画面。ログのソースと LLM の設定を入力する"> |
+
 ## セットアップ
 
 ### Claude Code で自動セットアップ
