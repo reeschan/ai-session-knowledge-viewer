@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { loadSettings, saveSettings, SettingsSchema, type Settings, type SourceConfig } from "@/lib/settings";
+import { rejectUnlessLocal } from "@/lib/request-guard";
 
 /** 文字列の欄だけ返す。欄が無ければ undefined。 */
 function field(form: FormData, name: string): string | undefined {
@@ -19,6 +20,8 @@ function buildSources(form: FormData, current: SourceConfig[]): unknown[] {
     const match = /^source\.(\d+)\.path$/.exec(key);
     if (match) indexes.add(Number(match[1]));
   }
+  // ソースの欄が 1 つも無いフォームでは、既存のソースをそのまま残す。
+  if (indexes.size === 0) return current;
   return [...indexes]
     .sort((a, b) => a - b)
     .filter((i) => (field(form, `source.${i}.path`) ?? "") !== "")
@@ -31,6 +34,9 @@ function buildSources(form: FormData, current: SourceConfig[]): unknown[] {
 }
 
 export async function POST(request: Request) {
+  const rejected = rejectUnlessLocal(request);
+  if (rejected) return rejected;
+
   const form = await request.formData();
   const current = await loadSettings();
   const f = (name: string, fallback: string) => field(form, name) ?? fallback;

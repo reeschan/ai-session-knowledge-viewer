@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateSkills, installSkills, type Period } from "@/lib/skills";
 import { loadSettings, saveSettings } from "@/lib/settings";
+import { rejectUnlessLocal } from "@/lib/request-guard";
 
 function field(form: FormData, name: string): string {
   const value = form.get(name);
@@ -12,6 +13,9 @@ function bad(message: string) {
 }
 
 export async function POST(request: Request) {
+  const rejected = rejectUnlessLocal(request);
+  if (rejected) return rejected;
+
   const form = await request.formData();
   const storeDir = field(form, "storeDir");
   const slackChannel = field(form, "slackChannel");
