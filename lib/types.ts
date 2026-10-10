@@ -1,6 +1,7 @@
 export type LogEntry = {
   id: string;
   client: "claude-code" | "codex";
+  source: "markdown" | "claude-code" | "codex";
   title: string;
   sessionId: string;
   project: string;
