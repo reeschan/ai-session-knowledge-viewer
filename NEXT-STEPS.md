@@ -9,12 +9,9 @@
 | 1 | Next.js 16 の雛形、`openai` / `tsx`、`.env.local` | ✅ コミット済み (Claude が実施。Qwen はループしたため) |
 | 2 | `lib/types.ts`, `lib/logs.ts` (ログ 125 件の読み込み) | ✅ コミット済み・検証済み |
 | 3 | `lib/analysis.ts`, `scripts/analyze.ts` | ✅ コミット済み。JSON 抽出の off-by-one を修正、`max_tokens: 3000` と `reasoning_effort: "low"` を追加。解析済みは 1 件のみ |
-| 4 | 画面 (一覧 / 詳細 / 学び) | ⏸ **途中で停止。未コミット・未検証** |
-| 5 | 全件解析 | 未着手 |
+| 4 | 画面 (一覧 / 詳細 / 学び) | ✅ コミット済み（79682ec）。PBI-001〜004 で絞り込みの不具合修正・タグ絞り込み・ログ読み込みの軽量化 |
+| 5 | 全件解析 | 一部実施（2026-10-09 時点で 27 / 125 件解析済み）。LLM サーバー停止中のため残りは未実施 |
 | 6 | 最終確認 | 未着手 |
-
-フェーズ 4 で未コミットのまま残っている変更:
-`app/layout.tsx`, `app/page.tsx`, `app/log/`, `app/learnings/`, `lib/knowledge.ts`, `public/*.svg` の削除。
 
 ## Qwen への指示の出し方
 
@@ -46,36 +43,7 @@ RULES:
 
 ## フェーズ 4: 画面の仕上げ
 
-1. まず人間 / Claude 側で途中の状態を確認する。
-
-   ```bash
-   cd /d/llm/knowledge-app
-   npx tsc --noEmit
-   npm run build
-   ```
-
-2. エラーが出たら、そのエラーを貼って Qwen に修正だけを頼む。指示文の例:
-
-   ```
-   You are working in D:\llm\knowledge-app (Next.js 16 App Router + TypeScript + Tailwind v4). Read SPEC.md first.
-   Phase 4 (UI) is partially done: app/page.tsx, app/layout.tsx, app/log/[id]/page.tsx, app/learnings/page.tsx, lib/knowledge.ts.
-   <RULES をここに貼る>
-   - Next.js 16: `params` / `searchParams` are Promises — `const { id } = await params;`.
-   - Every page: `export const dynamic = "force-dynamic";`. Server Components only; filters use <form method="get">.
-
-   Task: finish and fix the UI so that `npx tsc --noEmit` and `npm run build` both pass.
-   Current errors:
-   <エラーを貼る>
-   Check against SPEC.md that these exist: category sidebar with counts (+未解析), search q over title/summary/tags,
-   client & project filters, cards with 未解析 badge, /log/[id] detail with learnings and final response, /learnings grouped by category.
-   Reply with what you changed and the build result.
-   ```
-
-3. ビルドが通ったら `npm run dev` で http://localhost:3000 を開き、次を確認する。
-   - `/`: カテゴリのサイドバー、検索、クライアントとプロジェクトの絞り込み、「未解析」バッジ
-   - `/log/<id>`: 解析済みの `2025-09-22_xt_urban_webbim-frontend_01996dbc` と、未解析のログの両方
-   - `/learnings`
-4. 問題なければコミットする: `git add -A && git commit -m "Add UI (by local Qwen)"`
+完了
 
 ## フェーズ 5: 全件解析
 
@@ -102,5 +70,5 @@ npm run analyze                # 残り全件 (約 120 件 × 30〜60 秒 ≒ 1�
 ## 改善の候補 (任意)
 
 - 一覧のページング (件数が増えたとき)
-- 「再解析」ボタン、またはタグをクリックして絞り込み
+- 「再解析」ボタン
 - `/learnings` の重複をまとめる (似た学びが複数ログに出るため)

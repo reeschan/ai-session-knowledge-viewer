@@ -18,7 +18,9 @@ export default async function LearningsPage() {
     }
   }
 
-  const sections = [...CATEGORIES, "その他"].filter((c) => grouped.has(c));
+  const fixed: string[] = CATEGORIES.filter((c) => grouped.has(c));
+  const extra = [...grouped.keys()].filter((c) => !(CATEGORIES as readonly string[]).includes(c));
+  const sections = [...fixed, ...extra];
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
@@ -42,6 +44,7 @@ export default async function LearningsPage() {
               {items.map((item, i) => (
                 <li
                   key={i}
+                  data-learning-item=""
                   className="rounded border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
                 >
                   <p className="text-sm text-zinc-700 dark:text-zinc-300">{item.learning}</p>

@@ -35,15 +35,21 @@ export default async function ListPage({
   const category = typeof raw.category === "string" ? raw.category : "";
   const client = typeof raw.client === "string" ? raw.client : "";
   const project = typeof raw.project === "string" ? raw.project : "";
+  const tag = typeof raw.tag === "string" ? raw.tag : "";
 
   const all = await getKnowledge();
 
   const projects = [...new Set(all.map((entry) => entry.project).filter(Boolean))].sort();
 
   const filtered = all.filter((entry) => {
-    if (category && entry.analysis?.category !== category) return false;
+    if (category === "未解析") {
+      if (entry.analysis) return false;
+    } else if (category && entry.analysis?.category !== category) {
+      return false;
+    }
     if (client && entry.client !== client) return false;
     if (project && entry.project !== project) return false;
+    if (tag && !(entry.analysis?.tags ?? []).includes(tag)) return false;
     if (q && !matches(entry, q)) return false;
     return true;
   });
@@ -65,10 +71,27 @@ export default async function ListPage({
           カテゴリ
         </h2>
         <ul className="flex flex-col gap-1 text-sm">
+          <li>
+            <Link
+              href={buildHref({ category: "", q, client, project, tag })}
+              data-category-link=""
+              className={`block rounded px-2 py-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 ${
+                category === ""
+                  ? "bg-zinc-200 font-medium dark:bg-zinc-800"
+                  : "text-zinc-700 dark:text-zinc-300"
+              }`}
+            >
+              すべて
+              <span className="ml-1 text-xs text-zinc-500 dark:text-zinc-400">
+                {all.length}
+              </span>
+            </Link>
+          </li>
           {sidebarCategories.map((c) => (
             <li key={c}>
               <Link
-                href={buildHref({ category: c === "未解析" ? "" : c })}
+                href={buildHref({ category: c, q, client, project, tag })}
+                data-category-link={c}
                 className={`block rounded px-2 py-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 ${
                   category === c
                     ? "bg-zinc-200 font-medium dark:bg-zinc-800"
@@ -87,6 +110,8 @@ export default async function ListPage({
 
       <div className="flex-1">
         <form method="get" className="mb-4 flex flex-wrap gap-2">
+          {category && <input type="hidden" name="category" value={category} />}
+          {tag && <input type="hidden" name="tag" value={tag} />}
           <input
             name="q"
             defaultValue={q}
@@ -119,10 +144,25 @@ export default async function ListPage({
           </button>
         </form>
 
+        {tag && (
+          <div className="mb-4 text-sm text-zinc-700 dark:text-zinc-300">
+            タグ: {tag}{" "}
+            <Link
+              href={buildHref({ q, category, client, project })}
+              data-tag-clear=""
+              aria-label="タグの絞り込みを解除"
+              className="ml-1 text-zinc-500 hover:underline dark:text-zinc-400"
+            >
+              ×
+            </Link>
+          </div>
+        )}
+
         <ul className="flex flex-col gap-3">
           {filtered.map((entry) => (
             <li
               key={entry.id}
+              data-entry-id={entry.id}
               className="rounded border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
             >
               <div className="flex items-start justify-between gap-2">
@@ -144,7 +184,10 @@ export default async function ListPage({
                     {entry.analysis.category}
                   </span>
                 ) : (
-                  <span className="rounded bg-zinc-100 px-2 py-0.5 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                  <span
+                    data-badge="unanalyzed"
+                    className="rounded bg-zinc-100 px-2 py-0.5 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+                  >
                     未解析
                   </span>
                 )}
@@ -156,13 +199,14 @@ export default async function ListPage({
               )}
               {entry.analysis?.tags && entry.analysis.tags.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
-                  {entry.analysis.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+                  {entry.analysis.tags.map((t) => (
+                    <Link
+                      key={t}
+                      href={buildHref({ q, category, client, project, tag: t })}
+                      className="rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 hover:underline dark:bg-zinc-800 dark:text-zinc-300"
                     >
-                      {tag}
-                    </span>
+                      {t}
+                    </Link>
                   ))}
                 </div>
               )}

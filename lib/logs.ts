@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { open, readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import type { LogEntry } from "./types";
 
@@ -37,10 +37,34 @@ function extractFinalResponse(content: string): string {
   return (nextHeading === -1 ? after : after.slice(0, nextHeading)).trim();
 }
 
+const HEAD_CHUNK_SIZE = 64 * 1024;
+
+async function readHeadText(filePath: string): Promise<string> {
+  const handle = await open(filePath, "r");
+  try {
+    const marker = Buffer.from(CONVERSATION_HEADING, "utf8");
+    const chunks: Buffer[] = [];
+    let total = 0;
+    for (;;) {
+      const buf = Buffer.alloc(HEAD_CHUNK_SIZE);
+      const { bytesRead } = await handle.read(buf, 0, HEAD_CHUNK_SIZE, total);
+      if (bytesRead === 0) break;
+      chunks.push(buf.subarray(0, bytesRead));
+      total += bytesRead;
+      const all = Buffer.concat(chunks);
+      const index = all.indexOf(marker);
+      if (index !== -1) return all.subarray(0, index).toString("utf8");
+    }
+    return Buffer.concat(chunks).toString("utf8");
+  } finally {
+    await handle.close();
+  }
+}
+
 async function readLogFile(filePath: string, client: "claude-code" | "codex"): Promise<LogEntry> {
   const info = await stat(filePath);
-  const content = await readFile(filePath, "utf8");
-  const lines = content.split("\n");
+  const content = await readHeadText(filePath);
+  const lines = content.split(/\r?\n/);
 
   const title = lines.find((line) => line.startsWith("# "))?.slice(2).trim() ?? "";
   const meta = parseMetadata(lines);
@@ -89,9 +113,7 @@ export async function listLogs(): Promise<LogEntry[]> {
 }
 
 export async function readLogHead(filePath: string): Promise<string> {
-  const content = await readFile(filePath, "utf8");
-  const index = content.indexOf(CONVERSATION_HEADING);
-  return index === -1 ? content : content.slice(0, index);
+  return readHeadText(filePath);
 }
 
 export async function readLogBody(filePath: string, maxChars: number): Promise<string> {

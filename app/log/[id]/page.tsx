@@ -46,12 +46,13 @@ export default async function LogDetailPage({
               {entry.analysis.category}
             </span>
             {entry.analysis.tags.map((tag) => (
-              <span
+              <Link
                 key={tag}
-                className="rounded bg-zinc-100 px-2 py-0.5 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+                href={`/?tag=${encodeURIComponent(tag)}`}
+                className="rounded bg-zinc-100 px-2 py-0.5 text-zinc-600 hover:underline dark:bg-zinc-800 dark:text-zinc-300"
               >
                 {tag}
-              </span>
+              </Link>
             ))}
           </div>
         </section>
