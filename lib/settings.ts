@@ -112,6 +112,13 @@ export async function effectiveSettings(): Promise<Settings> {
     s.sources.push({ id: "env-log-root", type: "markdown", path: logRoot, enabled: true });
   }
 
+  if (s.skills.storeDir !== "") {
+    const storePath = path.join(s.skills.storeDir, "claude-code");
+    if (!s.sources.some((src) => src.path === storePath)) {
+      s.sources.push({ id: "skill-store", type: "claude-code", path: storePath, enabled: true });
+    }
+  }
+
   const anthropicKey = env("ANTHROPIC_API_KEY");
   if (anthropicKey) s.llm.anthropic.apiKey = anthropicKey;
 
