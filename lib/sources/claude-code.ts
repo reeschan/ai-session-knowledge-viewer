@@ -55,6 +55,8 @@ async function parseClaudeCodeLog(filePath: string, mtimeMs: number): Promise<Lo
   let branch: string | undefined;
   let startedIso: string | undefined;
   let startedMs = Infinity;
+  let updatedIso: string | undefined;
+  let updatedMs = -Infinity;
   let finalResponse = "";
 
   await readJsonLines(filePath, (row) => {
@@ -76,6 +78,10 @@ async function parseClaudeCodeLog(filePath: string, mtimeMs: number): Promise<Lo
         startedMs = ms;
         startedIso = timestamp;
       }
+      if (!Number.isNaN(ms) && ms > updatedMs) {
+        updatedMs = ms;
+        updatedIso = timestamp;
+      }
     }
     firstHuman ??= humanText(row);
     if (row.type === "assistant") finalResponse = textBlocks(asRecord(row.message)?.content);
@@ -92,6 +98,7 @@ async function parseClaudeCodeLog(filePath: string, mtimeMs: number): Promise<Lo
     project: project ?? "",
     branch: branch ?? "",
     startedAt: startedIso ? toLocalDateTime(startedIso) : "",
+    updatedAt: updatedIso ? toLocalDateTime(updatedIso) : "",
     filePath,
     mtimeMs,
     finalResponse,

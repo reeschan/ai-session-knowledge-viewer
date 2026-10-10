@@ -29,14 +29,23 @@ function firstSentence(text: string): string {
   return index === -1 ? trimmed : trimmed.slice(0, index + 1);
 }
 
+/** ローカル時刻の `YYYY-MM-DD HH:mm:ss` をミリ秒に。空・不正は null。 */
+function updatedTime(updatedAt: string): number | null {
+  if (!updatedAt) return null;
+  const ms = new Date(updatedAt.replace(" ", "T")).getTime();
+  return Number.isNaN(ms) ? null : ms;
+}
+
 export async function buildDigest({ period, now }: { period: Period; now: Date }): Promise<string> {
   const end = now.getTime();
   const start = end - PERIOD_MS[period];
 
   const [logs, analyses] = await Promise.all([listLogs(), loadAnalyses()]);
   const targets = logs
-    .filter((log) => log.mtimeMs >= start && log.mtimeMs < end)
-    .sort((a, b) => b.mtimeMs - a.mtimeMs);
+    .map((log) => ({ log, time: updatedTime(log.updatedAt) }))
+    .filter(({ time }) => time !== null && time >= start && time < end)
+    .sort((a, b) => (b.time as number) - (a.time as number))
+    .map(({ log }) => log);
 
   const lines: string[] = [`# ${PERIOD_LABEL[period]} ${formatLocal(new Date(start))} 〜 ${formatLocal(now)}`, ""];
 

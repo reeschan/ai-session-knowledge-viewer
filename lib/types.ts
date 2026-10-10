@@ -7,6 +7,8 @@ export type LogEntry = {
   project: string;
   branch: string;
   startedAt: string;
+  /** ログの最終更新時刻（ローカル時刻の `YYYY-MM-DD HH:mm:ss`）。ファイルの mtime ではなく中身から取る。 */
+  updatedAt: string;
   filePath: string;
   mtimeMs: number;
   finalResponse: string;

@@ -21,6 +21,7 @@ type HeaderMeta = {
   project?: string;
   branch?: string;
   startedAt?: string;
+  updatedAt?: string;
   hasSessionRow: boolean;
   isCodex: boolean;
 };
@@ -38,6 +39,7 @@ function parseMetadata(lines: string[]): HeaderMeta {
     } else if (key === "プロジェクト") meta.project = lastPathSegment(value);
     else if (key === "ブランチ") meta.branch = value;
     else if (key === "開始") meta.startedAt = value;
+    else if (key === "最終更新") meta.updatedAt = value;
     else if (key === "Codex") meta.isCodex = true;
   }
   return meta;
@@ -91,6 +93,7 @@ export async function parseMarkdownLog(filePath: string, mtimeMs: number): Promi
     project: meta.project ?? "",
     branch: meta.branch ?? "",
     startedAt: meta.startedAt ?? "",
+    updatedAt: meta.updatedAt || meta.startedAt || "",
     filePath,
     mtimeMs,
     finalResponse: extractFinalResponse(content),

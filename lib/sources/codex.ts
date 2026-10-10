@@ -45,8 +45,18 @@ async function parseCodexLog(filePath: string, mtimeMs: number): Promise<LogEntr
   let title: string | null = null;
   let taskComplete: string | undefined;
   let lastAssistant = "";
+  let updatedIso: string | undefined;
+  let updatedMs = -Infinity;
 
   await readJsonLines(filePath, (row) => {
+    const rowTimestamp = asString(row.timestamp);
+    if (rowTimestamp !== undefined) {
+      const ms = Date.parse(rowTimestamp);
+      if (!Number.isNaN(ms) && ms > updatedMs) {
+        updatedMs = ms;
+        updatedIso = rowTimestamp;
+      }
+    }
     const payload = asRecord(row.payload);
     if (row.type === "session_meta" && meta === undefined && payload) {
       meta = payload;
@@ -74,6 +84,7 @@ async function parseCodexLog(filePath: string, mtimeMs: number): Promise<LogEntr
   if (!sessionId) return null;
   const cwd = asString(meta.cwd) ?? "";
   const timestamp = asString(meta.timestamp) ?? metaTimestamp ?? "";
+  const startedAt = toLocalDateTime(timestamp);
   return {
     id: `codex-${sessionId}`,
     client: "codex",
@@ -82,7 +93,8 @@ async function parseCodexLog(filePath: string, mtimeMs: number): Promise<LogEntr
     sessionId,
     project: cwd ? lastPathSegment(cwd) : "",
     branch: asString(asRecord(meta.git)?.branch) ?? "",
-    startedAt: toLocalDateTime(timestamp),
+    startedAt,
+    updatedAt: (updatedIso ? toLocalDateTime(updatedIso) : "") || startedAt,
     filePath,
     mtimeMs,
     finalResponse: taskComplete ?? lastAssistant,

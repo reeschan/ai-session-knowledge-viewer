@@ -5,7 +5,9 @@ import type { LogEntry } from "../types";
 
 /** entry が null の行は「ログではないファイル」（再解析を避けるために記録する）。 */
 type CacheRow = { mtimeMs: number; size: number; entry: LogEntry | null };
-type CacheFile = { version: 1; entries: Record<string, CacheRow> };
+/** パーサ（LogEntry の中身）を変えたら版を上げる。版が違うキャッシュは読み捨てて解析し直す。 */
+const CACHE_VERSION = 2;
+type CacheFile = { version: number; entries: Record<string, CacheRow> };
 
 function cachePath(): string {
   return path.join(dataDir(), "log-index.json");
@@ -24,7 +26,7 @@ export class LogCache {
     const cache = new LogCache();
     try {
       const parsed = JSON.parse(await readFile(cachePath(), "utf8")) as Partial<CacheFile>;
-      if (parsed.version === 1 && parsed.entries && typeof parsed.entries === "object") {
+      if (parsed.version === CACHE_VERSION && parsed.entries && typeof parsed.entries === "object") {
         cache.old = parsed.entries;
       } else {
         cache.dirty = true;
@@ -55,7 +57,7 @@ export class LogCache {
     const tmp = `${file}.${process.pid}.${Math.random().toString(36).slice(2)}.tmp`;
     try {
       await mkdir(path.dirname(file), { recursive: true });
-      const data: CacheFile = { version: 1, entries: this.next };
+      const data: CacheFile = { version: CACHE_VERSION, entries: this.next };
       await writeFile(tmp, JSON.stringify(data), "utf8");
       await rename(tmp, file);
     } catch (error) {
