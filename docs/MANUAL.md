@@ -1,6 +1,6 @@
 # Knowledge Viewer マニュアル
 
-Claude Code / Codex の会話ログを読み込み、LLM でサマリー・カテゴリ・タグ・学びを付けて閲覧する Next.js アプリの設定マニュアルである。設定項目、環境変数、`pnpm configure`、スキル生成、トラブル対応をまとめる。
+Claude Code / Codex の会話ログを読み込み、LLM でサマリー・カテゴリ・タグ・学びを付けて閲覧する Hono アプリの設定マニュアルである。設定項目、環境変数、`pnpm configure`、スキル生成、トラブル対応をまとめる。
 
 ## 全体像
 
@@ -187,6 +187,8 @@ pnpm configure apply <パッチ.json>
 ## セキュリティ
 
 - `pnpm dev` / `pnpm start` は `127.0.0.1` だけで待ち受ける。
+- Host が `127.0.0.1` / `localhost` 以外のリクエストは、画面の GET も含めて全ルートで 403 で拒否する。Host の確認は全ルートに効く。
+- ポートは環境変数 `PORT` で変えられる（既定は 3000）。
 - 設定保存とスキルのインストールの API は、別のオリジン（別のサイト）や LAN など localhost 以外からのリクエストを 403 で拒否する。
 - API キーは `data/settings.json` に平文で保存する。このファイルを共有やコミットしない。画面では末尾 4 文字以外を伏せ、`pnpm configure detect` は有無しか出さない。
 - 環境変数で渡すなら `.env.local` を使い、コミットしない。

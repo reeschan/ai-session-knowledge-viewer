@@ -1,6 +1,6 @@
 # Knowledge Viewer
 
-Claude Code / Codex の会話ログを読み込み、LLM でサマリー・カテゴリ・タグ・学びを付けて、ナレッジとして閲覧する Next.js アプリです。
+Claude Code / Codex の会話ログを読み込み、LLM でサマリー・カテゴリ・タグ・学びを付けて、ナレッジとして閲覧する、Hono で動くローカルの Web アプリです。
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/architecture/architecture-dark.svg">
@@ -100,8 +100,11 @@ API キーは `data/settings.json` に **平文** で保存される (画面で�
 | `pnpm digest --period weekly` | 週次ダイジェスト。`--now <日時>` で基準時刻を指定できる |
 | `pnpm configure detect` | 現在の設定を JSON で出す (API キーは有無のみ) |
 | `pnpm configure apply <パッチ.json>` | 部分的な設定の JSON を設定ファイルにマージして保存する |
-| `pnpm dev` / `pnpm start` | 開発 / 本番サーバー |
-| `pnpm build` / `pnpm lint` | ビルド / Lint |
+| `pnpm dev` | 開発サーバー。TS と CSS の変更を自動で反映する |
+| `pnpm start` | build してからサーバーを起動する |
+| `pnpm build` | CSS の生成と型チェック |
+| `pnpm lint` | Lint |
+| `pnpm test` | テストを実行する (CSS を生成してから実行する) |
 
 ダイジェストの期間は、ログの中の最終更新時刻 (Markdown ヘッダの「最終更新」、生ログの最後の時刻) で判定する。ファイルの更新時刻ではない。
 
@@ -124,12 +127,14 @@ API キーは `data/settings.json` に **平文** で保存される (画面で�
 
 ## セキュリティ
 
-- `pnpm dev` / `pnpm start` は `127.0.0.1` だけで待ち受ける。
-- 設定保存とスキルのインストールの API は、別のサイトや LAN からのリクエストを拒否する。
+- `pnpm dev` / `pnpm start` は `127.0.0.1` だけで待ち受ける。ポートは環境変数 `PORT` で変えられる (既定は 3000)。
+- Host が `127.0.0.1` / `localhost` 以外のリクエストは、画面の GET も含めてすべてのルートで 403 で拒否する。
+- 設定保存とスキルのインストールの API は、別のサイトや LAN からのリクエストも拒否する。
 
 ## 開発メモ
 
-Next.js 16 (App Router) + TypeScript + Tailwind CSS。DB は使わず、各ページは Server Component でファイルを直接読む。
+Hono + hono/jsx (サーバー描画のみ)、`@hono/node-server`、TypeScript (`tsx` で直接実行)、Tailwind CSS v4 (`@tailwindcss/cli` で `public/app.css` を生成)、zod。DB は使わず、各画面はリクエストのたびにファイルを直接読む。
+構成は `server/` (起動・アプリ本体・画面・API)、`lib/`、`scripts/`、`test/`。この構成を選んだ経緯は [ADR 0001](docs/adr/0001-replace-nextjs-with-hono.md) を参照してください。
 型チェックは `pnpm exec tsc --noEmit`。パッケージマネージャーは pnpm（`package.json` の `packageManager`）。
 アーキ図のソースは `docs/architecture/architecture.d2`。構成を変えたら arch-diagram スキルで描き直す。
 
