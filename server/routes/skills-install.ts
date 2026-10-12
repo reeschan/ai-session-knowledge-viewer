@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
+import type { Context } from "hono";
 import { generateSkills, installSkills, type Period } from "@/lib/skills";
 import { loadSettings, saveSettings } from "@/lib/settings";
-import { rejectUnlessLocal } from "@/lib/request-guard";
 
 function field(form: FormData, name: string): string {
   const value = form.get(name);
@@ -12,11 +11,8 @@ function bad(message: string) {
   return new Response(`${message}\n`, { status: 400, headers: { "Content-Type": "text/plain; charset=utf-8" } });
 }
 
-export async function POST(request: Request) {
-  const rejected = rejectUnlessLocal(request);
-  if (rejected) return rejected;
-
-  const form = await request.formData();
+export async function postSkillsInstall(c: Context): Promise<Response> {
+  const form = await c.req.raw.formData();
   const storeDir = field(form, "storeDir");
   const slackChannel = field(form, "slackChannel");
   const appDir = field(form, "appDir");
@@ -35,5 +31,5 @@ export async function POST(request: Request) {
   const current = await loadSettings();
   await saveSettings({ ...current, skills: { storeDir, slackChannel, appDir } });
 
-  return NextResponse.redirect(new URL(`/skills?installed=${written.length}`, request.url), 303);
+  return c.redirect(`/skills?installed=${written.length}`, 303);
 }
