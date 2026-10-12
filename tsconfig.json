@@ -13,11 +13,10 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-    "incremental": true,
     "paths": {
       "@/*": ["./*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.mts"],
-  "exclude": ["node_modules", "docs", "app", "next.config.ts"]
+  "exclude": ["node_modules", "docs"]
 }
