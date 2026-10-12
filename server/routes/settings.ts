@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server";
+import type { Context } from "hono";
 import { loadSettings, saveSettings, SettingsSchema, type Settings, type SourceConfig } from "@/lib/settings";
-import { rejectUnlessLocal } from "@/lib/request-guard";
 
 /** 文字列の欄だけ返す。欄が無ければ undefined。 */
 function field(form: FormData, name: string): string | undefined {
@@ -33,11 +32,9 @@ function buildSources(form: FormData, current: SourceConfig[]): unknown[] {
     }));
 }
 
-export async function POST(request: Request) {
-  const rejected = rejectUnlessLocal(request);
-  if (rejected) return rejected;
-
-  const form = await request.formData();
+/** POST /api/settings。Host・Origin の確認は server/guard.ts が全ルートにかけている。 */
+export async function postSettings(c: Context): Promise<Response> {
+  const form = await c.req.raw.formData();
   const current = await loadSettings();
   const f = (name: string, fallback: string) => field(form, name) ?? fallback;
 
@@ -76,5 +73,5 @@ export async function POST(request: Request) {
 
   const next: Settings = parsed.data;
   await saveSettings(next);
-  return NextResponse.redirect(new URL("/settings?saved=1", request.url), 303);
+  return c.redirect("/settings?saved=1", 303);
 }

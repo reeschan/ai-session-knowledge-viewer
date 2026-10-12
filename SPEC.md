@@ -1,7 +1,7 @@
 # Knowledge Viewer — 仕様書
 
 このPCに保存されている AI エージェント (Claude Code / Codex) の会話ログを読み込み、
-LLM でサマリーとカテゴリを付けて、ナレッジとして閲覧できる Next.js アプリ。
+LLM でサマリーとカテゴリを付けて、ナレッジとして閲覧できる Hono (hono/jsx) アプリ。
 
 汎用化後の設計は `docs/design/generalize.md` を参照。
 
@@ -17,7 +17,7 @@ LLM でサマリーとカテゴリを付けて、ナレッジとして閲覧で�
   - Anthropic (既定モデル `claude-opus-5-5`)
   - OpenAI 互換 API (ローカル LLM など。ベース URL の既定は `http://127.0.0.1:8888/v1`)
   - 設定は `data/settings.json` に保存する (API キーは平文)。`.env.local.example` に変数の雛形がある。
-- 技術: Next.js (App Router) + TypeScript + Tailwind CSS + zod。DB は使わない。LLM は `@anthropic-ai/sdk` と `openai`。
+- 技術: Hono + hono/jsx (サーバー描画のみ) + `@hono/node-server` + TypeScript (`tsx` で直接実行) + Tailwind CSS v4 + zod。DB は使わない。LLM は `@anthropic-ai/sdk` と `openai`。
 - パッケージマネージャーは pnpm を使う（`pnpm-lock.yaml`、`pnpm-workspace.yaml`）。
 
 ## ログファイルの形式
@@ -94,19 +94,20 @@ type Analysis = {
    - `--limit N` オプションで処理件数を制限できる。
 5. `scripts/digest.ts` (`pnpm digest --period daily|weekly [--now <日時>]`): 期間内のログと解析結果から Markdown のダイジェストを標準出力に出す。期間は `updatedAt` で判定する。
 6. `lib/skills.ts`: スキルの生成。セッション保管スキル (`~/.claude/skills/session-archive`、Stop フックが必要) と、日次・週次ダイジェストの定期実行タスク (`~/.claude/scheduled-tasks/knowledge-digest-<period>`、Claude Desktop と Slack コネクタが必要)。
-7. 画面 (Server Components):
+7. 画面 (hono/jsx のサーバー描画):
    - `/` 一覧: カテゴリ別件数のサイドバー、キーワード検索 (`q`)、`category` (`未解析` を含む) / `client` / `project` / `tag` で絞り込み。新しい順。
-   - `/log/[id]` 詳細: メタ情報、サマリー、タグ、学び、最終応答。
+   - `/log/:id` 詳細: メタ情報、サマリー、タグ、学び、最終応答。
    - `/learnings` 全ログの「学び」をカテゴリ別に一覧。
    - `/settings` 設定画面 (ログの場所、LLM、API キー、スキルの設定)。
    - `/skills` スキル生成画面 (プレビュー、ダウンロード、インストール)。
    - 未解析のログも一覧に出し、「未解析」バッジを付ける。
-8. セキュリティ: `dev` / `start` は `127.0.0.1` だけで待ち受ける。設定保存とスキルのインストールの API は、別のサイトや LAN からのリクエストを拒否する。
+8. セキュリティ: `dev` / `start` は `127.0.0.1` だけで待ち受ける。Host が 127.0.0.1 / localhost 以外のリクエストは、画面の GET も含めて全ルートで 403 で拒否する (Host の確認は全ルートに効く)。設定保存とスキルのインストールの API は、別のサイトや LAN からのリクエストも拒否する。ポートは環境変数 `PORT` で変えられる (既定 3000)。
 9. デザインはシンプルでよい。ダークモード対応 (Tailwind の `dark:`)。
 
 ## 完了条件
 
 - `pnpm build` が成功する。
+- `pnpm test` が通る。
 - `pnpm analyze --limit 3` で 3 件が `data/analysis.json` に入る。
 - `pnpm dev` で上記ページと `/settings`・`/skills` が表示される。
 - `pnpm digest --period daily` が Markdown を標準出力に出す。

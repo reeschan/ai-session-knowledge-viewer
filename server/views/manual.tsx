@@ -1,11 +1,6 @@
-import type { Metadata } from "next";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { marked } from "marked";
-
-export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = { title: "マニュアル | Knowledge Viewer" };
 
 async function readText(file: string): Promise<string | null> {
   try {
@@ -43,17 +38,17 @@ async function renderManual(): Promise<string | null> {
   return html;
 }
 
-export default async function ManualPage() {
+export async function ManualPage() {
   const html = await renderManual();
 
   if (html === null) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-6">
-        <p className="text-sm text-muted-foreground">docs/MANUAL.md が見つかりません</p>
+      <div class="mx-auto max-w-3xl px-4 py-6">
+        <p class="text-sm text-muted-foreground">docs/MANUAL.md が見つかりません</p>
       </div>
     );
   }
 
   // html はリポジトリ内の信頼できるファイル（docs/MANUAL.md）だけから作る。外部入力は入らない。
-  return <div className="manual mx-auto max-w-3xl px-4 py-6" dangerouslySetInnerHTML={{ __html: html }} />;
+  return <div class="manual mx-auto max-w-3xl px-4 py-6" dangerouslySetInnerHTML={{ __html: html }} />;
 }
