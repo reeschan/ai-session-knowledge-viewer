@@ -2,16 +2,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { test } from "node:test";
-import { request, setupTestEnv } from "./helpers";
+import { escapeHtml, request, setupTestEnv } from "./helpers";
 
 const dir = setupTestEnv();
 const homeDir = process.env.KV_HOME_DIR ?? "";
 // 本物のホームの .claude に書かないよう、KV_HOME_DIR が一時フォルダを指していることを確かめる。
 assert.ok(homeDir !== "" && homeDir.startsWith(dir), "KV_HOME_DIR は一時フォルダを指していること");
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-}
 
 function listFiles(root: string): string[] {
   if (!fs.existsSync(root)) return [];

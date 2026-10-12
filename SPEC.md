@@ -96,7 +96,7 @@ type Analysis = {
 6. `lib/skills.ts`: スキルの生成。セッション保管スキル (`~/.claude/skills/session-archive`、Stop フックが必要) と、日次・週次ダイジェストの定期実行タスク (`~/.claude/scheduled-tasks/knowledge-digest-<period>`、Claude Desktop と Slack コネクタが必要)。
 7. 画面 (hono/jsx のサーバー描画):
    - `/` 一覧: カテゴリ別件数のサイドバー、キーワード検索 (`q`)、`category` (`未解析` を含む) / `client` / `project` / `tag` で絞り込み。新しい順。
-   - `/log/[id]` 詳細: メタ情報、サマリー、タグ、学び、最終応答。
+   - `/log/:id` 詳細: メタ情報、サマリー、タグ、学び、最終応答。
    - `/learnings` 全ログの「学び」をカテゴリ別に一覧。
    - `/settings` 設定画面 (ログの場所、LLM、API キー、スキルの設定)。
    - `/skills` スキル生成画面 (プレビュー、ダウンロード、インストール)。

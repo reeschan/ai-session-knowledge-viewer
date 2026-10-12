@@ -38,6 +38,11 @@ export function setupTestEnv(options: SetupOptions = {}): string {
   return dir;
 }
 
+/** hono/jsx が属性値に施すのと同じ HTML エスケープ (' は &#39; になる)。 */
+export function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 /** app.request() を呼ぶ。host ヘッダーが無ければ 127.0.0.1:3000 を足す。 */
 export async function request(requestPath: string, init: RequestInit = {}): Promise<Response> {
   const headers = new Headers(init.headers);

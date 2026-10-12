@@ -27,9 +27,20 @@ test("存在しないページは 404 で、Layout の中にメッセージを�
   assert.match(html, /Knowledge Viewer/);
 });
 
-test("存在しないログ ID は 404", async () => {
+test("存在しないログ ID は 404 で、Layout の中にメッセージを出す", async () => {
   const res = await request("/log/no-such-id");
   assert.equal(res.status, 404);
+  const html = await res.text();
+  assert.match(html, /見つかりません/);
+  assert.match(html, /Knowledge Viewer/);
+});
+
+test("末尾に / が付いた URL は / なしへ転送する", async () => {
+  for (const p of ["/settings/", "/learnings/", "/log/fixture-001/"]) {
+    const res = await request(p, { redirect: "manual" });
+    assert.equal(res.status, 301, p);
+    assert.ok((res.headers.get("location") ?? "").endsWith(p.slice(0, -1)), p);
+  }
 });
 
 test("Host が evil.example の GET は 403", async () => {

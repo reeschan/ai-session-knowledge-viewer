@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
 import { maskKey } from "@/lib/settings";
-import { FIXTURES, request, setupTestEnv } from "./helpers";
+import { escapeHtml, FIXTURES, request, setupTestEnv } from "./helpers";
 
 const API_KEY = "sk-test-0000-abcd";
 
@@ -16,11 +16,6 @@ const dir = setupTestEnv({
   },
 });
 const settingsFile = path.join(dir, "settings.json");
-
-/** hono/jsx が属性値に施すのと同じ HTML エスケープ。 */
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
 
 function readSettingsFile(): {
   llm: { provider: string; anthropic: { apiKey: string } };

@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { serveStatic } from "@hono/node-server/serve-static";
+import { trimTrailingSlash } from "hono/trailing-slash";
 import { getKnowledge } from "@/lib/knowledge";
 import { guard } from "./guard";
 import { Layout } from "./views/layout";
@@ -15,6 +16,8 @@ import { postSkillsInstall } from "./routes/skills-install";
 export const app = new Hono();
 
 app.use(guard);
+// 末尾に / が付いた URL は、/ なしへ転送する (Next.js の既定と同じ)。
+app.use(trimTrailingSlash());
 
 app.use("/app.css", serveStatic({ root: "./public" }));
 app.use("/favicon.ico", serveStatic({ root: "./public" }));
@@ -80,7 +83,7 @@ app.post("/api/skills/install", (c) => postSkillsInstall(c));
 
 app.notFound((c) =>
   c.html(
-    <Layout title="見つかりません | Knowledge Viewer">
+    <Layout>
       <div class="mx-auto max-w-6xl px-4 py-8">
         <p>見つかりません</p>
         <a href="/">一覧へ戻る</a>
