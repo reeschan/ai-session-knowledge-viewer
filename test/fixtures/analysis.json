@@ -1,0 +1,10 @@
+{
+  "fixture-001": {
+    "id": "fixture-001",
+    "mtimeMs": 0,
+    "summary": "テスト用のサマリー。",
+    "category": "実装",
+    "tags": ["hono", "テスト"],
+    "learnings": ["テスト用の学び"]
+  }
+}
