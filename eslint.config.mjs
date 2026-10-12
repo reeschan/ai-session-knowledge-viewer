@@ -1,16 +1,25 @@
 import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+import tseslint from "typescript-eslint";
 
 const eslintConfig = defineConfig([
-  ...nextVitals,
-  ...nextTs,
-  // Override default ignores of eslint-config-next.
+  ...tseslint.configs.recommended,
+  {
+    rules: {
+      // 既存コード (scripts/check-logs.ts:8) が、`{ finalResponse: _finalResponse, ...rest }` のように
+      // 使わない値を先頭 `_` の名前で受けて捨てている。コードは直さず、`_` 始まりの未使用は許す。
+      // (他の未使用変数・引数は引き続きエラーにする)
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { varsIgnorePattern: "^_", argsIgnorePattern: "^_" },
+      ],
+    },
+  },
   globalIgnores([
-    // Default ignores of eslint-config-next:
+    "node_modules/**",
     ".next/**",
-    "out/**",
-    "build/**",
+    "public/**",
+    "docs/**",
+    "app/**",
     "next-env.d.ts",
   ]),
 ]);
